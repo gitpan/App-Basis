@@ -1,0 +1,81 @@
+
+use strict;
+use warnings;
+
+use 5.014;
+
+use ExtUtils::MakeMaker 6.30;
+
+
+
+my %WriteMakefileArgs = (
+  "ABSTRACT" => "Basis for simple applications",
+  "AUTHOR" => "Kevin Mulholland <moodfarm\@cpan.org>",
+  "BUILD_REQUIRES" => {},
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
+  },
+  "DISTNAME" => "App-Basis",
+  "EXE_FILES" => [
+    "bin/appbasis"
+  ],
+  "LICENSE" => "perl",
+  "NAME" => "App::Basis",
+  "PREREQ_PM" => {
+    "Exporter" => 0,
+    "File::Basename" => 0,
+    "File::Temp" => 0,
+    "Getopt::Long" => 0,
+    "IPC::Cmd" => 0,
+    "Moo" => 0,
+    "Path::Tiny" => 0,
+    "Try::Tiny" => 0,
+    "YAML" => 0,
+    "strict" => 0,
+    "vars" => 0,
+    "warnings" => 0
+  },
+  "TEST_REQUIRES" => {
+    "Data::Printer" => 0,
+    "File::Slurp" => 0,
+    "Test::More" => 0
+  },
+  "VERSION" => "0.1",
+  "test" => {
+    "TESTS" => "t/*.t"
+  }
+);
+
+
+my %FallbackPrereqs = (
+  "Data::Printer" => 0,
+  "Exporter" => 0,
+  "File::Basename" => 0,
+  "File::Slurp" => 0,
+  "File::Temp" => 0,
+  "Getopt::Long" => 0,
+  "IPC::Cmd" => 0,
+  "Moo" => 0,
+  "Path::Tiny" => 0,
+  "Test::More" => 0,
+  "Try::Tiny" => 0,
+  "YAML" => 0,
+  "strict" => 0,
+  "vars" => 0,
+  "warnings" => 0
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  delete $WriteMakefileArgs{TEST_REQUIRES};
+  delete $WriteMakefileArgs{BUILD_REQUIRES};
+  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

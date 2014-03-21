@@ -1,0 +1,13 @@
+Changes
+LICENSE
+MANIFEST
+META.yml
+Makefile.PL
+README
+bin/appbasis
+dist.ini
+lib/App/Basis.pm
+lib/App/Basis/Config.pm
+perltidy.LOG
+t/app.t
+t/config.t

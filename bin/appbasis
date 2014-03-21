@@ -1,0 +1,123 @@
+#!/usr/bin/env perl
+# ABSTRACT Create a boilerplate app for App::Basis
+#
+# (c) kevin Mulholland 2014, moodfarm@cpan.org
+# this code is released under the Perl Artistic License
+# PODNAME: appbasis simple script to create a boilerplate app
+
+use strict;
+use warnings;
+use Path::Tiny;
+
+# -----------------------------------------------------------------------------
+# main
+
+my $appname = $ARGV[0];
+if ( -f $appname ) {
+    print "$appname already exists, not overwriting\n";
+    exit 1;
+}
+
+my $path = path($appname)->dirname;
+path($path)->mkpath if ($path);
+
+# read the data section after __END__
+my $boilerplate = join( "", <DATA> );
+$boilerplate =~ s/%%APPNAME%%/$appname/gsm;
+path($appname)->spew($boilerplate);
+if ( -f $appname ) {
+    # being lazy, not reading in the current value and updating and writing back
+    system("chmod a+x '$appname'") ;
+    print "app $appname created.\n";
+}
+else {
+    print "failed to create $appname\n";
+    exit 1 ;
+}
+
+exit 0;
+
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+appbasis simple script to create a boilerplate app
+
+=head1 VERSION
+
+version 0.1
+
+=head1 AUTHOR
+
+Kevin Mulholland <moodfarm@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2014 by Kevin Mulholland.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+
+__END__
+#!/usr/bin/env perl
+# %%APPNAME%%
+#
+# (c) yourname, your@email.address.com
+# this code is released under the Perl Artistic License
+
+use strict;
+use warnings;
+use POSIX qw(strftime) ;
+use App::Simple;
+use App::Simple::Config ;
+
+# -----------------------------------------------------------------------------
+# basic debug to STDERR, redirect to anywhere you like
+
+sub other_debug {
+    my ($debug) = @_;
+    say STDERR strftime( '%Y-%m-%d %H:%M:%S', gmtime( time() ) ) . " " . get_program() . " " . $debug;
+}
+
+# -----------------------------------------------------------------------------
+# main
+
+my $program = get_program();
+
+my %opt = init_app(
+    help_text    => "Boiler plate code for an App::Basis app",
+    help_cmdline => "extra commandline args",
+    options      => {
+        'verbose|v' => 'Dump extra useful information',
+        'test=s'    => {
+            desc => 'test item',
+
+            # depends => 'item',
+            default => 'testing 123',
+
+            # required => 1,
+        },
+        'item=s' => {
+
+            # required  => 1,
+            default => '123',
+            desc    => 'another item',
+
+            # validate => sub { my $val = shift ; return $val eq 'item'}
+        }
+    }
+);
+my $cfg = App::Simple::Config->new( filename => "$ENV{HOME}/.$program" ) ;
+# example of using an app specifc config
+my $user = $cfg->get('/appbasis/name') ;
+my $pass = $cfg->get('/appbasis/password') ;
+
+set_debug( \&other_debug );
+
+if ( $opt{verbose} ) {
+    debug("Started");
+}

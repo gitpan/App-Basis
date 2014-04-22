@@ -2,7 +2,7 @@
 
 
 package App::Basis;
-
+$App::Basis::VERSION = '0.2';
 use 5.014;
 use warnings;
 use strict;
@@ -11,11 +11,9 @@ use Getopt::Long;
 use Exporter;
 use File::Temp qw( tempfile);
 use IPC::Cmd qw(run run_forked);
+use List::Util qw(max);
 
 use vars qw( @EXPORT @ISA);
-
-our $VERSION = "0.003";
-$VERSION = eval { $VERSION };
 
 @ISA = qw(Exporter);
 
@@ -78,7 +76,7 @@ sub debug {
     if ( exists $_app_simple_objects{logger} ) {
 
         # run the coderef for the logger
-        $_app_simple_objects{logger}->($level, @debug) if ( defined $_app_simple_objects{logger} );
+        $_app_simple_objects{logger}->( $level, @debug ) if ( defined $_app_simple_objects{logger} );
     }
     else {
         # write all the debug lines to STDERR
@@ -120,8 +118,17 @@ sub init_app {
 
     $args{options}->{'help|h|?'} = 'Show help';
 
+    my @keys         = sort keys %{ $args{options} };
+    my %dnames       = _desc_names( @keys);
+    my $max_desc_len = max( map length, values %dnames ) + 1;
+    my $help_fmt     = "    %-${max_desc_len}s    %s\n";
+
+    # add help text for 'help' first.
+    $_app_simple_help_options .= sprintf $help_fmt, $dnames{'help|h|?'}, 'Show help';
+
     # get options and their descriptions
-    foreach my $o ( sort keys %{ $args{options} } ) {
+    # foreach my $o ( sort keys %{ $args{options} } ) {
+    foreach my $o (@keys) {
 
         # save the option
         push @options, $o;
@@ -157,17 +164,29 @@ sub init_app {
 
         # build the entry for the help text
         my $desc = $full_options{$name}->{desc};
+        if ( $name ne 'help' ) {
+            my $desc = $full_options{$name}->{desc};
 
-        # show the right way to use the options, single chars get - prefix
-        # names get -- prefix
-        my $dname = $name;
-        $dname .= '*' if ( $full_options{$name}->{required} );
-        $dname = ( length($dname) > 1 ? '--' : '-' ) . $dname;
-        my $sep = 15 - length($dname);
-        $sep = 0 if ( $sep < 0 );
-        $desc .= " [DEFAULT: $full_options{$name}->{default}]"
-            if ( $full_options{$name}->{default} );
-        $_app_simple_help_options .= "    $dname" . ( ' ' x $sep ) . " $desc\n";
+            # # show the right way to use the options, single chars get - prefix
+            # # names get -- prefix
+            # my $dname = $name;
+            # $dname .= '*' if ( $full_options{$name}->{required} );
+            # $dname = ( length($dname) > 1 ? '--' : '-' ) . $dname;
+            # my $sep = 15 - length($dname);
+            # $sep = 0 if ( $sep < 0 );
+            # $desc .= " [DEFAULT: $full_options{$name}->{default}]"
+            #     if ( $full_options{$name}->{default} );
+            # $_app_simple_help_options .= "    $dname" . ( ' ' x $sep ) . " $desc\n";
+
+            # show the right way to use the options
+            my $dname = $dnames{$o};
+            $dname .= '*' if ( $full_options{$name}->{required} );
+
+            $desc .= " [DEFAULT: $full_options{$name}->{default}]"
+                if ( $full_options{$name}->{default} );
+            $_app_simple_help_options .= sprintf $help_fmt, $dname, $desc;
+        }
+
     }
 
     # show required options
@@ -184,6 +203,7 @@ sub init_app {
 
     # check command line args
     GetOptions( \%_cmd_line_options, @options );
+
     # help is a built in
     show_usage() if ( $_cmd_line_options{help} );
 
@@ -191,7 +211,7 @@ sub init_app {
     foreach my $name ( sort keys %full_options ) {
         warn "Missing desc field for $name" if ( !$full_options{$name}->{desc} );
         if ( $full_options{$name}->{required} ) {
-            show_usage( "Required option '$name' is missing", 1 ) if ( !($_cmd_line_options{$name} || $full_options{$name}->{default}));
+            show_usage( "Required option '$name' is missing", 1 ) if ( !( $_cmd_line_options{$name} || $full_options{$name}->{default} ) );
         }
         if ( $full_options{$name}->{depends} ) {
             if ( !$_cmd_line_options{ $full_options{$name}->{depends} } ) {
@@ -208,7 +228,7 @@ sub init_app {
         if ( $full_options{$name}->{validate} ) {
             die "need to pass a coderef to validate for option '$name'" if ( !ref( $full_options{$name}->{validate} ) eq 'CODE' );
             die "Option '$name' has validate and should either also have a default or be required"
-                if ( !($full_options{$name}->{required} || $full_options{$name}->{default}) );
+                if ( !( $full_options{$name}->{required} || $full_options{$name}->{default} ) );
             my $coderef = $full_options{$name}->{validate};
             my $result  = $coderef->( $_cmd_line_options{$name} );
             show_usage("Option '$name' does not pass validation") if ( !$result );
@@ -352,10 +372,10 @@ sub run_cmd {
     my ( $ret, $err, $full_buff, $stdout_buff, $stderr_buff ) = run( command => $cmd );
 
     # my $full = join( "\n", @{$full_buff}) ;
-    my $stdout = join( "\n", @{$stdout_buff}) ;
-    my $stderr = join( "\n", @{$stderr_buff}) ;
+    my $stdout = join( "\n", @{$stdout_buff} );
+    my $stderr = join( "\n", @{$stderr_buff} );
 
-    return ( !$ret, $stdout, $stderr);
+    return ( !$ret, $stdout, $stderr );
 }
 
 # -----------------------------------------------------------------------------
@@ -369,12 +389,31 @@ sub fix_filename {
         my $parent = dirname( $ENV{PWD} );
         $file =~ s|^(\.\.)/|$parent/|;
     }
-    if ( $file =~ m|^\./| || $file eq '.') {
+    if ( $file =~ m|^\./| || $file eq '.' ) {
         $file =~ s|^(\.)/?|$ENV{PWD}|;
     }
     return $file;
 }
 
+# ----------------------------------------------------------------------------
+# Returns a hash containing a formatted name for each option. For example:
+# ( 'help|h|?' ) -> { 'help|h|?' => '-h, -?, --help' }
+sub _desc_names {
+    my %descs;
+    foreach my $o (@_) {
+        $_ = $o;    # Keep a copy of key in $o.
+        s/=.*$//;
+
+        # Sort by length so single letter options are shown first.
+        my @parts = sort { length $a <=> length $b } split /\|/;
+
+        # Single chars get - prefix, names get -- prefix.
+        my $s = join ", ", map { ( length > 1 ? '--' : '-' ) . $_ } @parts;
+
+        $descs{$o} = $s;
+    }
+    return %descs;
+}
 
 # ----------------------------------------------------------------------------
 # special function to help us test this module, as it flags that we can die
@@ -414,14 +453,14 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.1
+version 0.2
 
 =head1 SYNOPSIS
 
- use App::Basis
+    use App::Basis
 
- # main
- my %opt = App::Basis::init_app(
+    # main
+    my %opt = App::Basis::init_app(
     help_text   => 'Sample program description'
     , help_cmdline => 'extra stuff to print about command line use'
     , options   =>  {
@@ -444,15 +483,14 @@ version 0.1
         }
         , 'basic'   => 'basic argument, needs no hashref data'
     }
-   , ctrl_c   => \&ctrl_c_handler  # override built in ctrl-c handler
-   , cleanup  => \&cleanup_func    # optional func to call to clean up
-   , debug    => \&debug_func      # optional func to call with debugging data
- ) ;
+    , ctrl_c   => \&ctrl_c_handler  # override built in ctrl-c handler
+    , cleanup  => \&cleanup_func    # optional func to call to clean up
+    , debug    => \&debug_func      # optional func to call with debugging data
+    ) ;
 
-show_usage("need keep option") if( !$opt{keep}) ;
+    show_usage("need keep option") if( !$opt{keep}) ;
 
-msg_exit( "spurious reason to exit with error code 3", 3) ;
->
+    msg_exit( "spurious reason to exit with error code 3", 3) ;
 
 =head1 DESCRIPTION
 
@@ -487,8 +525,8 @@ or write lots of code.
 Write some debug data. If a debug function was passed to init_app that will be 
 used, otherwise we will write to STDERR.
 
-debug( "WARN", "some message") ;
-debug( "ERROR", "Something went wrong") ;
+    debug( "WARN", "some message") ;
+    debug( "ERROR", "Something went wrong") ;
 
 B<Parameters>
   string used as a 'level' of the error

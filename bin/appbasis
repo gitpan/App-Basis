@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
-# ABSTRACT Create a boilerplate app for App::Basis
+# PODNAME: appbasis
+# ABSTRACT: Create a boilerplate app for App::Basis
 #
 # (c) kevin Mulholland 2014, moodfarm@cpan.org
 # this code is released under the Perl Artistic License
@@ -13,6 +14,13 @@ use Path::Tiny;
 # main
 
 my $appname = $ARGV[0];
+
+if ( ! $appname ) {
+    print "To create a new application using App::Basis, you need to provide the name on the command line\n";
+    exit 1;
+}
+
+
 if ( -f $appname ) {
     print "$appname already exists, not overwriting\n";
     exit 1;
@@ -43,11 +51,11 @@ exit 0;
 
 =head1 NAME
 
-appbasis simple script to create a boilerplate app
+appbasis - Create a boilerplate app for App::Basis
 
 =head1 VERSION
 
-version 0.1
+version 0.2
 
 =head1 AUTHOR
 
@@ -79,9 +87,16 @@ use App::Simple::Config ;
 # basic debug to STDERR, redirect to anywhere you like
 
 sub other_debug {
-    my ($debug) = @_;
-    say STDERR strftime( '%Y-%m-%d %H:%M:%S', gmtime( time() ) ) . " " . get_program() . " " . $debug;
+    my ($lvl, $debug) = @_;
+    if(!$debug) {
+        $debug = $lvl ;
+        # set a default level
+        $lvl = 'INFO' ;
+    }
+
+    say STDERR strftime( '%Y-%m-%d %H:%M:%S', gmtime( time() ) ) . " [$lvl] " . get_program() . " " . $debug;
 }
+
 
 # -----------------------------------------------------------------------------
 # main
@@ -119,5 +134,5 @@ my $pass = $cfg->get('/appbasis/password') ;
 set_debug( \&other_debug );
 
 if ( $opt{verbose} ) {
-    debug("Started");
+    debug( "INFO", "Started");
 }

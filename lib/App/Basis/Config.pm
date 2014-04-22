@@ -3,7 +3,7 @@
 
 
 package App::Basis::Config;
-
+$App::Basis::Config::VERSION = '0.2';
 use 5.010;
 use warnings;
 use strict;
@@ -11,9 +11,6 @@ use Moo ;
 use YAML qw( LoadFile DumpFile);
 use Try::Tiny;
 use App::Basis;    # let us use some of the App::Basis singletons
-
-our $VERSION = "0.001";    # or "0.001_001" for a dev release
-$VERSION = eval { $VERSION };
 
 
 
@@ -73,24 +70,24 @@ sub BUILD {
     $self->_set_error(undef);
 
     # make sure that the we expand home
-    my $fname = $self->filename();
+    my $fname = $self->filename;
     $fname =~ s/^~/$ENV{HOME}/;
 
     if ( !$fname ) {
         $fname = $ENV{APP_BASIS_CFG};
         if ( !$fname ) {
-            $fname = "$ENV{HOME}/.app_basis.cfg";
+            $fname = "$ENV{HOME}/." . $App::Basis::PROGRAM . ".cfg";
         }
     }
     if ( $fname && -f $fname ) {
         $self->_set_filename($fname);
+
         my $config;
         try {
             $config = LoadFile($fname);
         }
         catch {
-            say "$@";
-            $self->_set_error("Could not read/processs config file $fname");
+            $self->_set_error("Could not read/processs config file $fname. $_");
         };
 
         # if we loaded some config
@@ -268,7 +265,7 @@ App::Basis::Config - Manage config YAML files in a simple manner
 
 =head1 VERSION
 
-version 0.1
+version 0.2
 
 =head1 SYNOPSIS
 

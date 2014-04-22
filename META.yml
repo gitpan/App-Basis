@@ -33,4 +33,4 @@ requires:
   warnings: 0
 resources:
   repository: git://github.com/27escape/App-Basis.git
-version: 0.2
+version: 0.3

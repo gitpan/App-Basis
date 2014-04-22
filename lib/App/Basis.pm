@@ -2,7 +2,7 @@
 
 
 package App::Basis;
-$App::Basis::VERSION = '0.2';
+$App::Basis::VERSION = '0.3';
 use 5.014;
 use warnings;
 use strict;
@@ -119,7 +119,7 @@ sub init_app {
     $args{options}->{'help|h|?'} = 'Show help';
 
     my @keys         = sort keys %{ $args{options} };
-    my %dnames       = _desc_names( @keys);
+    my %dnames       = _desc_names(@keys);
     my $max_desc_len = max( map length, values %dnames ) + 1;
     my $help_fmt     = "    %-${max_desc_len}s    %s\n";
 
@@ -182,8 +182,7 @@ sub init_app {
             my $dname = $dnames{$o};
             $dname .= '*' if ( $full_options{$name}->{required} );
 
-            $desc .= " [DEFAULT: $full_options{$name}->{default}]"
-                if ( $full_options{$name}->{default} );
+            $desc .= " [DEFAULT: $full_options{$name}->{default}]" if ( $full_options{$name}->{default} );
             $_app_simple_help_options .= sprintf $help_fmt, $dname, $desc;
         }
 
@@ -453,7 +452,7 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.2
+version 0.3
 
 =head1 SYNOPSIS
 

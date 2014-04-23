@@ -11,5 +11,5 @@ cpanfile
 dist.ini
 lib/App/Basis.pm
 lib/App/Basis/Config.pm
-t/app.t
-t/config.t
+t/01_app.t
+t/02_config.t

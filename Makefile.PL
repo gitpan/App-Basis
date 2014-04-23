@@ -42,7 +42,7 @@ my %WriteMakefileArgs = (
     "File::Slurp" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.3",
+  "VERSION" => "0.4",
   "test" => {
     "TESTS" => "t/*.t"
   }

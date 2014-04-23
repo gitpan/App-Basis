@@ -2,7 +2,7 @@
 
 
 package App::Basis;
-$App::Basis::VERSION = '0.3';
+$App::Basis::VERSION = '0.4';
 use 5.014;
 use warnings;
 use strict;
@@ -127,7 +127,6 @@ sub init_app {
     $_app_simple_help_options .= sprintf $help_fmt, $dnames{'help|h|?'}, 'Show help';
 
     # get options and their descriptions
-    # foreach my $o ( sort keys %{ $args{options} } ) {
     foreach my $o (@keys) {
 
         # save the option
@@ -166,17 +165,6 @@ sub init_app {
         my $desc = $full_options{$name}->{desc};
         if ( $name ne 'help' ) {
             my $desc = $full_options{$name}->{desc};
-
-            # # show the right way to use the options, single chars get - prefix
-            # # names get -- prefix
-            # my $dname = $name;
-            # $dname .= '*' if ( $full_options{$name}->{required} );
-            # $dname = ( length($dname) > 1 ? '--' : '-' ) . $dname;
-            # my $sep = 15 - length($dname);
-            # $sep = 0 if ( $sep < 0 );
-            # $desc .= " [DEFAULT: $full_options{$name}->{default}]"
-            #     if ( $full_options{$name}->{default} );
-            # $_app_simple_help_options .= "    $dname" . ( ' ' x $sep ) . " $desc\n";
 
             # show the right way to use the options
             my $dname = $dnames{$o};
@@ -365,12 +353,11 @@ sub execute_cmd {
 sub run_cmd {
     my $cmd = shift;
 
-    # use our path and not the system one so that it can pass taint checks
-    local $ENV{PATH} = "/bin:/usr/bin:/usr/local/bin:$ENV{HOME}/bin";
+    # use our local version of path so that it can pass taint checks
+    local $ENV{PATH} = $ENV{PATH} ;
 
     my ( $ret, $err, $full_buff, $stdout_buff, $stderr_buff ) = run( command => $cmd );
 
-    # my $full = join( "\n", @{$full_buff}) ;
     my $stdout = join( "\n", @{$stdout_buff} );
     my $stderr = join( "\n", @{$stderr_buff} );
 
@@ -382,6 +369,7 @@ sub run_cmd {
 
 sub fix_filename {
     my $file = shift;
+    return if( !$file) ;
 
     $file =~ s/^~/$ENV{HOME}/;
     if ( $file =~ m|^\.\./| ) {
@@ -391,6 +379,8 @@ sub fix_filename {
     if ( $file =~ m|^\./| || $file eq '.' ) {
         $file =~ s|^(\.)/?|$ENV{PWD}|;
     }
+    # replace multiple separators
+    $file =~ s|//|/|g ;
     return $file;
 }
 
@@ -452,7 +442,7 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.3
+version 0.4
 
 =head1 SYNOPSIS
 

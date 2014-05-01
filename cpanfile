@@ -15,7 +15,6 @@ requires "warnings" => "0";
 
 on 'test' => sub {
   requires "Data::Printer" => "0";
-  requires "File::Slurp" => "0";
   requires "Test::More" => "0";
   requires "perl" => "5.014";
 };

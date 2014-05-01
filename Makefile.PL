@@ -39,10 +39,9 @@ my %WriteMakefileArgs = (
   },
   "TEST_REQUIRES" => {
     "Data::Printer" => 0,
-    "File::Slurp" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.5",
+  "VERSION" => "0.6",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -53,7 +52,6 @@ my %FallbackPrereqs = (
   "Data::Printer" => 0,
   "Exporter" => 0,
   "File::Basename" => 0,
-  "File::Slurp" => 0,
   "File::Temp" => 0,
   "Getopt::Long" => 0,
   "IPC::Cmd" => 0,

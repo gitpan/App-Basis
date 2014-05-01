@@ -4,7 +4,6 @@ author:
   - 'Kevin Mulholland <moodfarm@cpan.org>'
 build_requires:
   Data::Printer: 0
-  File::Slurp: 0
   Test::More: 0
   perl: 5.014
 configure_requires:
@@ -33,4 +32,4 @@ requires:
   warnings: 0
 resources:
   repository: git://github.com/27escape/App-Basis.git
-version: 0.5
+version: 0.6

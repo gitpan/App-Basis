@@ -2,7 +2,7 @@
 
 
 package App::Basis;
-$App::Basis::VERSION = '0.5';
+$App::Basis::VERSION = '0.6';
 use 5.014;
 use warnings;
 use strict;
@@ -442,7 +442,7 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.5
+version 0.6
 
 =head1 SYNOPSIS
 
@@ -461,7 +461,7 @@ version 0.5
     }
 
     sub debug_func {
-    my ($lvl, $debug) = @_;
+        my ($lvl, $debug) = @_;
         if(!$debug) {
             $debug = $lvl ;
             # set a default level

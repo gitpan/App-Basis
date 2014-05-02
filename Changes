@@ -1,3 +1,5 @@
+0.7 2014-05-02
+  * Fix tests for windows
 0.6 2014-05-01
   * App::Basis::Config changes
     * change to use Path::Tiny to load/store config

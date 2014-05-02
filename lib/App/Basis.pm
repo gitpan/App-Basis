@@ -2,7 +2,7 @@
 
 
 package App::Basis;
-$App::Basis::VERSION = '0.6';
+$App::Basis::VERSION = '0.7';
 use 5.014;
 use warnings;
 use strict;
@@ -442,7 +442,7 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.6
+version 0.7
 
 =head1 SYNOPSIS
 

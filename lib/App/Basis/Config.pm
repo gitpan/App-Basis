@@ -3,7 +3,7 @@
 
 
 package App::Basis::Config;
-$App::Basis::Config::VERSION = '0.7';
+$App::Basis::Config::VERSION = '0.8';
 use 5.010;
 use warnings;
 use strict;
@@ -282,7 +282,7 @@ App::Basis::Config - Manage config YAML files in a simple manner
 
 =head1 VERSION
 
-version 0.7
+version 0.8
 
 =head1 SYNOPSIS
 

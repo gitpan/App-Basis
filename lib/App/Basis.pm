@@ -2,14 +2,14 @@
 
 
 package App::Basis;
-$App::Basis::VERSION = '0.7';
+$App::Basis::VERSION = '0.8';
 use 5.014;
 use warnings;
 use strict;
-use File::Basename qw(basename dirname);
 use Getopt::Long;
 use Exporter;
-use File::Temp qw( tempfile);
+use File::HomeDir ;
+use Path::Tiny;
 use IPC::Cmd qw(run run_forked);
 use List::Util qw(max);
 
@@ -33,7 +33,7 @@ use vars qw( @EXPORT @ISA);
 
 # ----------------------------------------------------------------------------
 
-my $PROGRAM = basename $0 ;
+my $PROGRAM = path($0)->basename ;
 
 # these variables are held available throughout the life of the app
 my $_app_simple_ctrlc_count = 0;
@@ -371,13 +371,15 @@ sub fix_filename {
     my $file = shift;
     return if( !$file) ;
 
-    $file =~ s/^~/$ENV{HOME}/;
+    my $home = File::HomeDir->my_home ;
+    $file =~ s/^~/$home/;
     if ( $file =~ m|^\.\./| ) {
-        my $parent = dirname( $ENV{PWD} );
-        $file =~ s|^(\.\.)/|$parent/|;
+        my $parent = path( Path::Tiny->cwd )->dirname;
+        $file =~ s|^(\.{2})/|$parent/|;
     }
     if ( $file =~ m|^\./| || $file eq '.' ) {
-        $file =~ s|^(\.)/?|$ENV{PWD}|;
+        my $cwd = Path::Tiny->cwd;
+        $file =~ s|^(\.)/?|$cwd|;
     }
     # replace multiple separators
     $file =~ s|//|/|g ;
@@ -442,7 +444,7 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.7
+version 0.8
 
 =head1 SYNOPSIS
 

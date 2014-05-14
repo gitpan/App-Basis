@@ -3,7 +3,6 @@ abstract: 'Basis for simple applications'
 author:
   - 'Kevin Mulholland <moodfarm@cpan.org>'
 build_requires:
-  Data::Printer: 0
   Test::More: 0
   perl: 5.014
 configure_requires:
@@ -17,8 +16,7 @@ meta-spec:
 name: App-Basis
 requires:
   Exporter: 0
-  File::Basename: 0
-  File::Temp: 0
+  File::HomeDir: 0
   Getopt::Long: 0
   IPC::Cmd: 0
   List::Util: 0
@@ -32,4 +30,4 @@ requires:
   warnings: 0
 resources:
   repository: git://github.com/27escape/App-Basis.git
-version: 0.7
+version: 0.8

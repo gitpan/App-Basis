@@ -3,7 +3,7 @@
 
 
 package App::Basis::Config;
-$App::Basis::Config::VERSION = '0.8';
+$App::Basis::Config::VERSION = '0.9';
 use 5.010;
 use warnings;
 use strict;
@@ -11,7 +11,6 @@ use Moo;
 use YAML qw( Load Dump);
 use Path::Tiny;
 use Try::Tiny;
-use App::Basis;    # let us use some of the App::Basis singletons
 
 
 
@@ -134,7 +133,7 @@ sub store {
     # only save if we need to
     if ($need_save) {
         if ( $self->nostore ) {
-            debug( "WARN", "Attempt to save config file " . $self->filename . " when nostore has been used" );
+            warn "Attempt to save config file " . $self->filename . " when nostore has been used";
             return 0;
         }
 
@@ -282,7 +281,7 @@ App::Basis::Config - Manage config YAML files in a simple manner
 
 =head1 VERSION
 
-version 0.8
+version 0.9
 
 =head1 SYNOPSIS
 

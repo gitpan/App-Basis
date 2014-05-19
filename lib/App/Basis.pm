@@ -2,16 +2,17 @@
 
 
 package App::Basis;
-$App::Basis::VERSION = '0.8';
+$App::Basis::VERSION = '0.9';
 use 5.014;
 use warnings;
 use strict;
 use Getopt::Long;
 use Exporter;
-use File::HomeDir ;
+use File::HomeDir;
 use Path::Tiny;
 use IPC::Cmd qw(run run_forked);
 use List::Util qw(max);
+use POSIX qw(strftime);
 
 use vars qw( @EXPORT @ISA);
 
@@ -27,13 +28,15 @@ use vars qw( @EXPORT @ISA);
     debug set_debug
     daemonise
     execute_cmd run_cmd
+    set_log_file
     fix_filename
     set_test_mode
 );
 
 # ----------------------------------------------------------------------------
 
-my $PROGRAM = path($0)->basename ;
+my $PROGRAM  = path($0)->basename;
+my $LOG_FILE = fix_filename("~/$PROGRAM.log");
 
 # these variables are held available throughout the life of the app
 my $_app_simple_ctrlc_count = 0;
@@ -68,6 +71,14 @@ sub _output {
 # ----------------------------------------------------------------------------
 
 
+sub set_log_file {
+    my ($file) = @_;
+    $LOG_FILE = $file;
+}
+
+# ----------------------------------------------------------------------------
+
+
 sub debug {
     my ( $level, @debug ) = @_;
 
@@ -79,8 +90,7 @@ sub debug {
         $_app_simple_objects{logger}->( $level, @debug ) if ( defined $_app_simple_objects{logger} );
     }
     else {
-        # write all the debug lines to STDERR
-        _output( 'STDERR', "$level: " . join( ' ', @debug ) );
+        path($LOG_FILE)->append_utf8( strftime( '%Y-%m-%d %H:%M:%S', gmtime( time() ) ) . "[$level] " . join( ' ', @debug ) . "\n");
     }
 }
 
@@ -90,7 +100,7 @@ sub debug {
 sub set_debug {
     my $func = shift;
     if ( !$func || ref($func) ne "CODE" ) {
-        debug( "WARN", "set_debug function expects a CODE, got a " . ref( ($func) ) );
+        warn "set_debug function expects a CODE, got a " . ref($func);
     }
     else {
         $_app_simple_objects{logger} = $func;
@@ -105,6 +115,10 @@ sub init_app {
     my @options;
     my $has_required = 0;
     my %full_options;
+
+    if ( $args{log_file} ) {
+        $LOG_FILE = fix_filename( $args{log_file} );
+    }
 
     if ( $args{debug} ) {
         set_debug( $args{debug} );
@@ -354,7 +368,7 @@ sub run_cmd {
     my $cmd = shift;
 
     # use our local version of path so that it can pass taint checks
-    local $ENV{PATH} = $ENV{PATH} ;
+    local $ENV{PATH} = $ENV{PATH};
 
     my ( $ret, $err, $full_buff, $stdout_buff, $stderr_buff ) = run( command => $cmd );
 
@@ -369,9 +383,9 @@ sub run_cmd {
 
 sub fix_filename {
     my $file = shift;
-    return if( !$file) ;
+    return if ( !$file );
 
-    my $home = File::HomeDir->my_home ;
+    my $home = File::HomeDir->my_home;
     $file =~ s/^~/$home/;
     if ( $file =~ m|^\.\./| ) {
         my $parent = path( Path::Tiny->cwd )->dirname;
@@ -381,8 +395,9 @@ sub fix_filename {
         my $cwd = Path::Tiny->cwd;
         $file =~ s|^(\.)/?|$cwd|;
     }
+
     # replace multiple separators
-    $file =~ s|//|/|g ;
+    $file =~ s|//|/|g;
     return $file;
 }
 
@@ -444,7 +459,7 @@ App::Basis - Simple way to create applications
 
 =head1 VERSION
 
-version 0.8
+version 0.9
 
 =head1 SYNOPSIS
 
@@ -500,6 +515,7 @@ version 0.8
     , ctrl_c   => \&ctrl_c_handler  # override built in ctrl-c handler
     , cleanup  => \&cleanup_func    # optional func to call to clean up
     , debug    => \&debug_func      # optional func to call with debugging data
+    , log_file => "~/log/fred.log"  # alternative place to store default log messages
     ) ;
 
     show_usage("need keep option") if( !$opt{keep}) ;
@@ -536,6 +552,13 @@ There is a helper script to create the boilerplate for an appbasis script, see L
 
 =over 4
 
+=item set_log_file
+
+Set the name of the log file for the debug function
+
+    set_log_file( "/tmp/lof_file_name") ;
+    debug( "INFO", adding to the debug log") ;
+
 =item debug
 
 Write some debug data. If a debug function was passed to init_app that will be 
@@ -567,6 +590,7 @@ B<Parameters> hash of these things
     help_cmdline - extra things to put after the sample args on a sample command line (optional)
     cleanup      - coderef of function to call when your script ends (optional)
     debug        - coderef of function to call to save/output debug data (optional, recommended)
+    log_file     - alternate name of file to store debug to
     ctrlc_func   - coderef of function to call when user presses ctrl-C
     options      - hashref of program arguments
       simple way

@@ -29,6 +29,7 @@ my %WriteMakefileArgs = (
     "IPC::Cmd" => 0,
     "List::Util" => 0,
     "Moo" => 0,
+    "POSIX" => 0,
     "Path::Tiny" => 0,
     "Try::Tiny" => 0,
     "YAML" => 0,
@@ -39,7 +40,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => 0
   },
-  "VERSION" => "0.8",
+  "VERSION" => "0.9",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -53,6 +54,7 @@ my %FallbackPrereqs = (
   "IPC::Cmd" => 0,
   "List::Util" => 0,
   "Moo" => 0,
+  "POSIX" => 0,
   "Path::Tiny" => 0,
   "Test::More" => 0,
   "Try::Tiny" => 0,

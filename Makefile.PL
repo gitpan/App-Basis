@@ -32,7 +32,7 @@ my %WriteMakefileArgs = (
     "POSIX" => 0,
     "Path::Tiny" => 0,
     "Try::Tiny" => 0,
-    "YAML" => 0,
+    "YAML::XS" => 0,
     "strict" => 0,
     "vars" => 0,
     "warnings" => 0
@@ -40,7 +40,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => 0
   },
-  "VERSION" => "0.9",
+  "VERSION" => "1.0",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -58,7 +58,7 @@ my %FallbackPrereqs = (
   "Path::Tiny" => 0,
   "Test::More" => 0,
   "Try::Tiny" => 0,
-  "YAML" => 0,
+  "YAML::XS" => 0,
   "strict" => 0,
   "vars" => 0,
   "warnings" => 0

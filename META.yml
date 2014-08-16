@@ -24,11 +24,11 @@ requires:
   POSIX: 0
   Path::Tiny: 0
   Try::Tiny: 0
-  YAML: 0
+  YAML::XS: 0
   perl: 5.014
   strict: 0
   vars: 0
   warnings: 0
 resources:
   repository: git://github.com/27escape/App-Basis.git
-version: 0.9
+version: 1.0
